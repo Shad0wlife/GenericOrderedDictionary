@@ -78,15 +78,6 @@ namespace GenericOrderedDictionary
             else if (array is DictionaryEntry[] dictEntryArray)
             {
                 Entry[]? entries = _entries;
-                /*
-                for (int i = 0; i < _count; i++)
-                {
-                    if (entries![i].next >= -1)
-                    {
-                        dictEntryArray[index++] = new DictionaryEntry(entries[i].key, entries[i].value);
-                    }
-                }
-                */
 
                 int cnt = 0;
                 Entry entry = entries![_first];
@@ -112,15 +103,6 @@ namespace GenericOrderedDictionary
                 {
                     int count = _count;
                     Entry[]? entries = _entries;
-                    /*
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (entries![i].next >= -1)
-                        {
-                            objects[index++] = new KeyValuePair<TKey, TValue>(entries[i].key, entries[i].value);
-                        }
-                    }
-                    */
 
                     int cnt = 0;
                     Entry entry = entries![_first];

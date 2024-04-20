@@ -49,12 +49,7 @@ namespace GenericOrderedDictionary
 
                 int count = _dictionary._count;
                 Entry[]? entries = _dictionary._entries;
-                /*
-                for (int i = 0; i < count; i++)
-                {
-                    if (entries![i].next >= -1) array[index++] = entries[i].key;
-                }
-                */
+
                 int cnt = 0;
                 Entry entry = entries![_dictionary._first];
                 while (entry.orderNext != 0)
@@ -134,13 +129,6 @@ namespace GenericOrderedDictionary
                     Entry[]? entries = _dictionary._entries;
                     try
                     {
-                        /*
-                        for (int i = 0; i < count; i++)
-                        {
-                            if (entries![i].next >= -1) objects[index++] = entries[i].key;
-                        }
-                        */
-
                         int cnt = 0;
                         Entry entry = entries![_dictionary._first];
                         while (entry.orderNext != 0)
@@ -208,7 +196,7 @@ namespace GenericOrderedDictionary
                 {
                     get
                     {
-                        if (_index == -2 /* end */ || _index == _dictionary._first /*(_index == _dictionary._count + 1)*/)
+                        if (_index == -2 /* end */ || _index == _dictionary._first)
                         {
                             throw new InvalidOperationException("Enum Operation Cannot Happen.");
                         }

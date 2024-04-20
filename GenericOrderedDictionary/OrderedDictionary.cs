@@ -24,7 +24,7 @@ namespace GenericOrderedDictionary
         private int[]? _buckets;
         private Entry[]? _entries;
 
-        //Lib: Don't compile for x64 but determine at runtime
+        //Lib: Don't compile for x64 but determine at runtime vis IntPtr Size
         private ulong _fastModMultiplier;
 
         private int _count;
@@ -70,13 +70,6 @@ namespace GenericOrderedDictionary
                 // Special-case EqualityComparer<string>.Default, StringComparer.Ordinal, and StringComparer.OrdinalIgnoreCase.
                 // We use a non-randomized comparer for improved perf, falling back to a randomized comparer if the
                 // hash buckets become unbalanced.
-                /* MARKER
-                if (typeof(TKey) == typeof(string) &&
-                    NonRandomizedStringEqualityComparer.GetStringComparer(_comparer!) is IEqualityComparer<string> stringComparer)
-                {
-                    _comparer = (IEqualityComparer<TKey>)stringComparer;
-                }
-                */
             }
             else if (comparer is not null && // first check for null to avoid forcing default comparer instantiation unnecessarily
                      comparer != EqualityComparer<TKey>.Default)
@@ -188,17 +181,6 @@ namespace GenericOrderedDictionary
         {
             get
             {
-                /* MARKER
-                if (typeof(TKey) == typeof(string))
-                {
-                    Debug.Assert(_comparer is not null, "The comparer should never be null for a reference type.");
-                    return (IEqualityComparer<TKey>)IInternalStringEqualityComparer.GetUnderlyingEqualityComparer((IEqualityComparer<string?>)_comparer);
-                }
-                else
-                {
-                    return _comparer ?? EqualityComparer<TKey>.Default;
-                }
-                */
                 return _comparer ?? EqualityComparer<TKey>.Default;
             }
         }
@@ -337,17 +319,9 @@ namespace GenericOrderedDictionary
                 throw new ArgumentException($"ArrayPlusOffTooSmall - {nameof(index)}");
             }
 
-            int count = _count;
+
             Entry[]? entries = _entries;
-            /*
-            for (int i = 0; i < count; i++)
-            {
-                if (entries![i].next >= -1)
-                {
-                    array[index++] = new KeyValuePair<TKey, TValue>(entries[i].key, entries[i].value);
-                }
-            }
-            */
+
             int cnt = 0;
             Entry entry = entries![_first];
             while (entry.orderNext != 0)
@@ -473,10 +447,8 @@ namespace GenericOrderedDictionary
         ConcurrentOperation:
             throw new InvalidOperationException("Concurrent Operations not Supported.");
         Return:
-            //return ref entry;
             return i;
         ReturnNotFound:
-            //entry = ref Unsafe.NullRef<Entry>();
             i = -1;
             goto Return;
         }
@@ -663,16 +635,6 @@ namespace GenericOrderedDictionary
                 _first = index;
             }
 
-            // Value types never rehash
-            /* MARKER
-            if (!typeof(TKey).IsValueType && collisionCount > HashHelpers.HashCollisionThreshold && comparer is NonRandomizedStringEqualityComparer)
-            {
-                // If we hit the collision threshold we'll need to switch to the comparer which is using randomized string hashing
-                // i.e. EqualityComparer<string>.Default.
-                Resize(entries.Length, true);
-            }
-            */
-
             return true;
         }
 
@@ -759,14 +721,11 @@ namespace GenericOrderedDictionary
             HashHelpers.SerializationInfoTable.Remove(this);
         }
 
-        private void Resize() => Resize(HashHelpers.ExpandPrime(_count)/*, false*/);
+        private void Resize() => Resize(HashHelpers.ExpandPrime(_count));
 
-        private void Resize(int newSize/* MARKER , bool forceNewHashCodes*/)
+        private void Resize(int newSize)
         {
             // Value types never rehash
-            /* MARKER
-            Debug.Assert(!forceNewHashCodes || !typeof(TKey).IsValueType);
-            */
             Debug.Assert(_entries != null, "_entries should be non-null");
             Debug.Assert(newSize >= _entries.Length);
 
@@ -776,22 +735,6 @@ namespace GenericOrderedDictionary
 
             int count = _count;
             Array.Copy(_entries, entries, count);
-
-            /* MARKER
-            if (!typeof(TKey).IsValueType && forceNewHashCodes)
-            {
-                Debug.Assert(_comparer is NonRandomizedStringEqualityComparer);
-                IEqualityComparer<TKey> comparer = _comparer = (IEqualityComparer<TKey>)((NonRandomizedStringEqualityComparer)_comparer).GetRandomizedEqualityComparer();
-
-                for (int i = 0; i < count; i++)
-                {
-                    if (entries[i].next >= -1)
-                    {
-                        entries[i].hashCode = (uint)comparer.GetHashCode(entries[i].key);
-                    }
-                }
-            }
-            */
 
             // Assign member variables after both arrays allocated to guard against corruption from OOM if second fails
             _buckets = new int[newSize];
@@ -1060,7 +1003,7 @@ namespace GenericOrderedDictionary
             }
 
             int newSize = HashHelpers.GetPrime(capacity);
-            Resize(newSize/*, forceNewHashCodes: false*/);
+            Resize(newSize);
             return newSize;
         }
 
@@ -1227,7 +1170,7 @@ namespace GenericOrderedDictionary
             {
                 get
                 {
-                    if (_index == -2 /* end */ || _index == _dictionary._first /*(_index == _dictionary._count + 1)*/)
+                    if (_index == -2 /* end */ || _index == _dictionary._first)
                     {
                         throw new InvalidOperationException("Enum Operation Cannot Happen.");
                     }
@@ -1256,7 +1199,7 @@ namespace GenericOrderedDictionary
             {
                 get
                 {
-                    if (_index == -2 /* end */ || _index == _dictionary._first /*(_index == _dictionary._count + 1)*/)
+                    if (_index == -2 /* end */ || _index == _dictionary._first)
                     {
                         throw new InvalidOperationException("Enum Operation Cannot Happen.");
                     }
@@ -1269,7 +1212,7 @@ namespace GenericOrderedDictionary
             {
                 get
                 {
-                    if (_index == -2 /* end */ || _index == _dictionary._first /*(_index == _dictionary._count + 1)*/)
+                    if (_index == -2 /* end */ || _index == _dictionary._first)
                     {
                         throw new InvalidOperationException("Enum Operation Cannot Happen.");
                     }
@@ -1282,7 +1225,7 @@ namespace GenericOrderedDictionary
             {
                 get
                 {
-                    if (_index == -2 /* end */ || _index == _dictionary._first /*(_index == _dictionary._count + 1)*/)
+                    if (_index == -2 /* end */ || _index == _dictionary._first)
                     {
                         throw new InvalidOperationException("Enum Operation Cannot Happen.");
                     }
