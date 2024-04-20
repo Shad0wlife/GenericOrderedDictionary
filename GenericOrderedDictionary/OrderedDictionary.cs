@@ -230,7 +230,12 @@ namespace GenericOrderedDictionary
             Debug.Assert(modified); // If there was an existing key and the Add failed, an exception will already have been thrown.
         }
 
-        
+        public void Prepend(TKey key, TValue value)
+        {
+            bool modified = TryInsertFirst(key, value, InsertionBehavior.ThrowOnExisting);
+            Debug.Assert(modified); // If there was an existing key and the Add failed, an exception will already have been thrown.
+        }
+
 
         public void Clear()
         {
@@ -975,7 +980,9 @@ namespace GenericOrderedDictionary
         public bool TryAdd(TKey key, TValue value) =>
             TryInsertLast(key, value, InsertionBehavior.None);
 
-       
+        public bool TryPrepend(TKey key, TValue value) =>
+            TryInsertFirst(key, value, InsertionBehavior.None);
+
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<KeyValuePair<TKey, TValue>>)this).GetEnumerator();
 
