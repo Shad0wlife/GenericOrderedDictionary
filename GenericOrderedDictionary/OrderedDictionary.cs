@@ -78,7 +78,7 @@ namespace GenericOrderedDictionary
             }
         }
 
-        public OrderedDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, null) { Debug.WriteLine("IDictionary Constructor."); }
+        public OrderedDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, null) { }
 
         public OrderedDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey>? comparer) :
             this(dictionary?.Count ?? 0, comparer)
@@ -91,7 +91,7 @@ namespace GenericOrderedDictionary
             AddRange(dictionary);
         }
 
-        public OrderedDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, null) { Debug.WriteLine("IEnumerable Constructor."); }
+        public OrderedDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, null) { }
 
         public OrderedDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey>? comparer) :
             this((collection as ICollection<KeyValuePair<TKey, TValue>>)?.Count ?? 0, comparer)
@@ -106,7 +106,6 @@ namespace GenericOrderedDictionary
 
         private void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> enumerable)
         {
-            Debug.WriteLine("AddRange on OrderedDictionary.");
             // It is likely that the passed-in enumerable is Dictionary<TKey,TValue>. When this is the case,
             // avoid the enumerator allocation and overhead by looping through the entries array directly.
             // We only do this when dictionary is Dictionary<TKey,TValue> and not a subclass, to maintain
@@ -225,7 +224,6 @@ namespace GenericOrderedDictionary
 
         public void Add(TKey key, TValue value)
         {
-            Debug.WriteLine("OrderedDictionary Add.");
             bool modified = TryInsertLast(key, value, InsertionBehavior.ThrowOnExisting);
             Debug.Assert(modified); // If there was an existing key and the Add failed, an exception will already have been thrown.
         }
@@ -497,7 +495,6 @@ namespace GenericOrderedDictionary
             {
                 throw new ArgumentNullException(nameof(key));
             }
-            Debug.WriteLine($"TryInsert with prev = {prev} and next = {next}"); ;
 
             if (_buckets == null)
             {
@@ -605,7 +602,6 @@ namespace GenericOrderedDictionary
                 entries = _entries;
             }
 
-            Debug.WriteLine($"Adding new entry at array index {index}");
             ref Entry entry = ref entries![index];
             entry.hashCode = hashCode;
             entry.next = bucket - 1; // Value in _buckets is 1-based
@@ -734,7 +730,6 @@ namespace GenericOrderedDictionary
             Debug.Assert(_entries != null, "_entries should be non-null");
             Debug.Assert(newSize >= _entries.Length);
 
-            Debug.WriteLine($"Resizing from {_entries.Length} to {newSize}");
 
             Entry[] entries = new Entry[newSize];
 
